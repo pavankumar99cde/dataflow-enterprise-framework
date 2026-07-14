@@ -1,0 +1,471 @@
+DataBricks Certification exam practice quesitons
+1 of 59. A data engineer is implementing Unity Catalog governance for a multi-team environment. Data scientists need interactive clusters for basic data exploration tasks, while automated ETL jobs require dedicated processing. How should the data engineer configure cluster isolation policies to enforce least privilege and ensure Unity Catalog compliance? 
+A. Allow all users to create any cluster type and rely on manual configuration to enable Unity Catalog access modes. 
+B. Use only DEDICATED access mode for both interactive workloads and automated jobs to maximize security isolation. 
+C. Configure all clusters with NO ISOLATION SHARED access modes since Unity Catalog works with any cluster configuration. 
+D. Create compute policies with STANDARD access mode for interactive workloads and DEDICATED access mode for automated jobs.
+-----------------------------------------------------------------------------------------------------------------------------
+2 of 59. An organisation processes customer data from web and mobile applications. Data includes names, emails, phone numbers, and location history. Data arrives both as Batch files from an SFTP drop (daily) and Streaming JSON events from Kafka (real-time). To comply with intemal data privacy policies, the following requirements must be met: Personally identifiable information (PII) like email, phone_number, and ip_address must be masked or anonymized before storage Both batch and streaming pipelines must apply consistent PII handling Masking logic must be auditable and reproducible The masked data must still be usable for downstream analytics How should the data engineer design a compliant data pipeline on Databricks that supports both batch and streaming modes, applies data masking to Pll, and maintains traceability of transformations for audits?
+ A Use Lakeflow Spark Declarative Pipelines for batch and streaming ingestion, define a PII masking function, and apply it during Bronze ingestion before writing to Delta Lake. 
+B. Ingest both batch and streaming data using Lakeflow Spark Declarative Pipelines, and apply masking via Unity Catalog column masks at read time to avoid modifying the data during ingestion. 
+CO Load batch data with notebooks and ingest streaming data with SQL Warehouses; use Unity Catalog column masks on Silver tables to redact fields after storage. 
+DO Allow Pil to be stored unmasked in Bronze for lineage tracking, then apply masking logic in Gold tables used for reporting.
+-----------------------------------------------------------------------------------------------------------------------------
+3 of 59 A platform team lead is responsible for automating the individual teams attribution towards SQL Warehouse usage. The requirement is to identify the SQL warehouse usage at the individual user's level and generate a daily report to be shared with an executive team that includes leaders from all business units. How should the platform lead generate an automated report that can be shared daily?
+ A Use the system tables to capture the audit and billing usage data and share the queries with the executive team. This enables the executives to execute the query and see the latest results any time.
+ B. Use the system tables to capture the audit and billing usage data and create a dashboard with daily refresh schedules and shared with the executive team. 
+ CO Restrict users from running any SQL query unless they provide all the query details so that the attribution can be calculated and shared with the executive team.
+ DO Let the users run the SQL query and then directly report the usage to the executives. The ownership of the SQL warehouse usage will be with the individual teams.
+-----------------------------------------------------------------------------------------------------------------------------
+4 of 59. A security analytics pipeline must enrich billions of raw connection logs with geolocation data. The join hinges on finding which IPv4 range each avent's address falls into. Table 1 network events (=5 billion rows) event idip int 42 3232235777 Table 2 in ranges (= 2 million rows) start_ip_intend_ip_int country 32322355203232236031US This query is running very slowly and needs to be improved:
+ SELECT n.event id, n.ip_int, r.country FROM network_events n ip ranges ON n.ip int BETWEEN r.start_ip_int AND r.end_ip_int:
+ Execution is far too slow. Which change will most dramatically accelerate the query while preserving its logic? A Add a broadcast 
+ hint: /*+ BROADCAST (r) */ for ip_ranges. Table 2 start ip intend ip int country This query is running very slowly and needs to be improved: SELECT n.event_id, n.ip int, FROM r.country network events n JOIN ON ip_ranges r n.ip int BETWEEN r.start_ip_int AND r.end_ip_int/ Execution is far too slow. Which change will most dramatically accelerate the query while preserving its logic? 
+A Add a broadcast hint: /*+ BROADCAST (r) / for ip_ranges. 
+8. Add a range-join hint /16 bin size (65536): /*+ RANGE_JOIN (r, 65536) */. CO Increase spark.sql.shuffle.partitions from 200 to 10000.
+ DO Force a sort-merge join with /*+ MERGE (r)/ on ip_ranges.
+-----------------------------------------------------------------------------------------------------------------------------
+5 of 59. Given the following PySpark code snippet in a Databricks notebook: ltered of spark.read.format("delta").load("/mnt/data/large_table") \ Liter("event_date> '2024-01-01'") filtered df.count() The data engineer notices from the Query Profile that the scan operator for filtered_df is reading almost all files, despite a filter being applied. What is the probable reason for poor data skipping? 
+A The filter condition involves a data type that is excluded from data skipping support. 
+B. The filter is executed only after the full data scan, which prevents data skipping from taking place. 
+CO The Delta table lacks optimization that enables dynamic file pruning. 
+D. The event date column is outside the table's partitioning and Z-ordering scheme.
+-----------------------------------------------------------------------------------------------------------------------------
+6 of 59. A data engineering team needs to implement a tagging system for their tables as part of an automated ETL process, and needs to apply tags programmatically to tables in Unity Catalog. Which SQL command adds tags to a table programmatically? A ALTER TABLE table_name SET TAGS ('keyl' 'valuel', 'key2' 'value2'); & APPLY TAGS ON table_name VALUES ('keyl' 'valuel', 'key2' 'value2'); 
+CO COMMENT ON TABLE table_name TAGS ('keyl' = 'valuel', 'key2' 'value2'); 
+DO SET TAGS FOR table_name AS ('key' = 'valuel', 'key2' 'value2');
+
+-----------------------------------------------------------------------------------------------------------------------------
+7 of 59. A data engineer is running a groupBy aggregation on a massive user activity log grouped by user_id. A few users have millions of records, causing task skew and long runtimes. Which technique will fix the skew in this aggregation? 
+A increase the Spark driver memory and retry.
+ 8. Use reduceByKey instead of groupBy to avoid shuffles. 
+CO Filter out the skewed users before the aggregation. 
+DOUse salting by adding a random prefix to skewed keys before aggregation, then aggregate again after removing the prefix.
+-----------------------------------------------------------------------------------------------------------------------------
+Bof 59. A data engineer is designing a Lakeflow Spark Declarative Pipeline to process streaming order data. The pipeline uses Auto Loader to Ingest dels and must enforce data quality by ensuring customer_id and amount are greater than zero. Invalid records should be dropped. Which Lakeflow Spark Declarative Pipelines configurations implement this requirement using Python? 
+Aedit.table Bdit.expect("valid_customer", "customer_id IS NOT NULL") @dlt.expect("valid_amount", "amount (*) def silver_orders(): return dlt.read_stream("bronze_orders") 
+
+B. edit.table def silver orders(): return dlt.read_stream("bronze_orders").expect("valid_customer", "customer id IS NOT NULL").expect("valid_amount", "amount > 0")
+
+ CO edit.table @dlt.expect_or_drop("valid_customer", "customer_id IS NOT NULL") edit.expect_or_drop("valid_amount", "amount > 0") def silver_orders(): return dir.read stream("bronze_orders") 
+ 
+ DO#dit.table def silver_orders(): return dlt.read stream("bronze_orders").expect_or_drop("valid_customer", "customer_id IS NOT MILL").expect_or_drop("valid_amount", "amount > 0")
+-----------------------------------------------------------------------------------------------------------------------------
+9 of 59. A company wants to implement Lakehouse Federation across multiple data sources, but is worried about data consistency and ensuring all teams access the same authoritative version of their data Which statement is applicable for Lakehouse Federations to maintain data consistency? 
+A Federation implements change data capture from all sources.
+ B. Federation creates local copies that must be manually refreshed. 
+ CA separate data synchronization service must be deployed. 
+ DO Federation provides read-only access that reflects the current state of source systems.
+-----------------------------------------------------------------------------------------------------------------------------
+10 of 59. A data engineering team has a time-consuming data ingestion job. It has three data sources, and each data ingestion notebook takes about one hour to load new data. The job had been working fine, loading data every midnight. However, one day they received an alert message stating the job had failed. By investigating the cause, they figured out that the failed notebook code was updated, and a new required configuration was introduced to parameterize a hardcoded value without notice. Now, the team has to fix the issue as quickly as possible to load the latest data from the failing data source. Which action should the team take in this scenario? 
+AUpdate the task by adding the missing task parameter, and manually run the job. 
+Share the analysis with the failing notebook owner so that they can fix it quickly. 
+CO Repair the run with the new parameter.
+ Repair the run with the new parameter, and update the task by adding the missing task parameter.
+-----------------------------------------------------------------------------------------------------------------------------
+11 of 59. A data architect is designing a Databricks solution to efficiently process data for different business requirements. in which scenario should a data engineer use a materialized view compared to a streaming table? 
+A Ingesting data from Apache Kafka topics with sub-second processing requirements for immediate alerting. 
+BO Implementing a CDC (Change Data Capture) pipeline that needs to detect and respond to database changes within seconds.
+ CO Processing high-volume, continuous clickstream data from a website to monitor user behavior in real-time.
+ DO Precomputing complex aggregations and joins from multiple large tables to accelerate Bi dashboard performance.
+-----------------------------------------------------------------------------------------------------------------------------
+Har should the data engineer meet the requirements to capture good and bad data? Aedit.view @dit.expect_or_drop("lat_long present", "(lat IS NOT NULL AND long IS NOT NULL)") def tripa data_quarantine(): return spark.readStream.table ("ride_and_go.telemetry.trips") BOBalt.table (name "trips_data_quarantine") def trips data quarantine(): return ( ) spark.readStream.table("raw_trips_data") .filter (expr (quarantine rules)) CO edit.table (partition_cols=["is_quarantined"], ) @dit.expect_all (rules) def trips_data_quarantine(): return ( spark.readStream.table("raw_trips_data") .withColumn("is_quarantined", expr (quarantine_rules)) D.O @dit.table @dit.expect_all_or_drop(rules) def trips_data_quarantine(): return spark.readStream.table("raw_trips_data") Mark this item for later review.
+-----------------------------------------------------------------------------------------------------------------------------
+13 of 59. A workspace admin has created a new catalog called 'finance data' and wants to delegate permission management to a finance team lead without giving them full admin rights. Which privilege should be granted to the finance team lead? 
+A GRANT OPTION privilege on the finance_data catalog. 
+BALL PRIVILEGES on the finance_data catalog. 
+COMANAGE privilege on the finance_data catalog.
+ D. Make the finance team lead a metastore admin.
+-----------------------------------------------------------------------------------------------------------------------------
+14 of 59. A streaming video analytics team ingests billions of events daily into a Unity Catalog-managed Delta table video_events. Analysts run ad-hoc point-lookup queries on columns like user_id, campaign id, and region. The team manually runs OPTIMIZE video_events Z-ORDER user id, campaign_id, region, but still sees poor performance on recent data, and dislikes the operational overhead. The team wants a hands-off way to keep hot columns co-located as query patterns evolve. Which Delta capability should the team leverage on video_events? 
+A Schedule OPTIMIZE/ZORDER to run after each job to improve recent file performance. 
+BUtilize Liquid Clustering CLUSTER BY AUTO and Predictive Optimization. 
+Enable auto-compaction (optimizeWrite & autoCompact).
+ DO Enable Delta caching.
+-----------------------------------------------------------------------------------------------------------------------------
+15 of 39. A data engineer created a daily batch ingestion pipeline using a cluster with the latest DBR version to store banking transaction data, and persisted it in a MANAGED DELTA table called prod.gold.all_banking_transactions_daily. The data engineer is constantly receiving complaints, from business units that constantly read this table in an ad hoc way using a SQL Serverless Warehouse, regarding the poor performance of their queries. Analyzing the queries, the data engineer stated that these areas use high cardinality columns as filters, to perform their analysis. The data engineer is studying possibilities to implement a data layout optimization technique for that table, which is incremental, easy to maintain, and can easily evolve over time. Which command should the data engineer implement?
+ A. Alter the table to use Hive Style Partitions + Z-ORDER and implement a periodic OPTIMIZE command.
+ Alter the table to use Liquid Clustering and implement a periodic OPTIMIZE command. 
+ Alter the table to use Z-ORDER and implement a periodic OPTIMIZE command.
+ DO Alter the table to use Hive Style Partitions and implement a periodic OPTIMIZE command.
+-----------------------------------------------------------------------------------------------------------------------------
+16 of 38. A data engineer needs to effectively install the PyYAML Python package for YAML file processing within their Databricks environment, However, the Databricks workspace is air-gapped and does not have direct internet access to download packages from PyPl. The engineer has proactively downloaded the necessary PyYAML wheel (.whl) file onto their laptop. The data engineer wants to install the PyVAML package from the local wheel file in such a way that it is automatically available whenever any new cluster is provisioned in their Databricks workspace. Which approach should the data engineer use? 
+AAfter setting up a private PyPI repository and registering the PyYAML.whl file, set up a cluster-scoped init script that executes /databricks/python/bin/pip install-index-url-https://(repo-url) PyYAML on the cluster.
+ Upload the PyYAML. whl file to a Unity Catalog Volume. They then ensure the path to this wheel file is added to the Unity Catalog allowlist. Finally, they create a cluster-scoped init script that executes pip install/path/to/PyYAML.whl. 
+COUpload and register the PyYAML.whl file under the data engineer's user home directory in the Workspace, and set up a cluster-scoped init script that executes pip install/path/to/PyYAML.whl on the shared cluster.
+ DO Add the PyYAML. wh1 file directly to their Databricks Git Repos. They assume that by committing the wheel file into the Repo, any cluster created that is linked to this Repo will automatically have PyYAML installed from that file.
+-----------------------------------------------------------------------------------------------------------------------------
+17 of 59. A data engineer has a delta table order with deletion vectors enabled for it. The engineer is attempting to execute the below code: DELETE FROM orders WHERE status 'cancelled' What should be the behaviour of deletion vectors when the command is executed?
+ A Rows are marked as deleted both in metadata and in files. 
+ B. Files are physically rewritten without the deleted row. 
+CO Rows are marked as deleted in metadata, not in files. 
+D. Delta automatically removes all cancelled orders permanently.
+-----------------------------------------------------------------------------------------------------------------------------
+18 of 59. Which method can be used to determine the total wall-clock time it took to execute a query? 
+AO in the Spark Ul, take the sum of all task durations that ran across all stages for all jobs associated with that query.
+ B. Open the Query Profiler associated with that query and use the Aggregated task time metric.
+ CO In the Spark Ul, take the job duration of the longest-running job associated with that query. 
+ D. Open the Query Profiler associated with that query and use the Total wall-clock duration metric.
+-----------------------------------------------------------------------------------------------------------------------------
+19 of 59. A data engineer is creating a daily reporting Job. There are two reporting notebooks, one for weekdays and the other for weekends. An true" to route the job to either weekday or weekend "Belse condition" task is configured as "((job.start_time.is_weekday}} notebook tasks. The same job would be used in multiple time zones. Which action should a senior data engineer take upon reviewing the job to merge or reject the pull request?
+ A Reject. As they should use {{job.trigger_time.is_weekday)} instead. 
+B. Merge. As the job configuration looks good.
+C. Reject. As the ([job.start_time.is weekday)) is not a valid value reference. 
+ D. Reject. As the {{job.start_time.is_weekday}) is for the UTC timezone.
+-----------------------------------------------------------------------------------------------------------------------------
+20 of 59. Two data engineers are working on the same Databricks notebook in separate branches. Both have edited the same section of code. When one tres to merge the other's branch into their own using the Databricks Git folders UI, a merge conflict occurs on that notebook file. The Ul highlights the conflict and presents options for resolution. How should the data engineers resolve this merge conflict using Databricks Git folders? 
+A Use the Git folders Ul to manually edit the notebook file, selecting the desired lines from both versions and removing the conflict markers, then mark the conflict as resolved. 
+B. Abort the merge, discard all local changes, and try the merge operation again without reviewing the conflicting code. 
+CO Use the Git CLI in the cluster's web terminal to force-push the conflicted merge (git push-force), overriding the remote branch with local version and discarding changes. 
+DDelete the conflicted notebook file via the Databricks workspace UI, commit the deletion, and recreate the notebook from scratch in a new commit to bypass the conflict entirely.
+-----------------------------------------------------------------------------------------------------------------------------
+21 of 59. A data engineer is configuring Delta Sharing for a Databricks-to-Databricks scenario to optimize read performance. The recipient needs to perform time travel queries and streaming reads on shared sales data. Which configuration will provide the optimal performance while enabling these capabilities? 
+A. Use the open sharing protocol instead of Databricks-to-Databricks sharing for better performance. 
+8 Share tables WITHOUT HISTORY and enable partitioning for better query performance. 
+CO Share the entire schema WITHOUT HISTORY and rely on recipient-side caching for performance. 
+DO Share tables WITH HISTORY, ensure tables don't have partitioning enabled, and enable CDF before sharing.
+-----------------------------------------------------------------------------------------------------------------------------
+22 of 59. A data engineer is developing an LDP pipeline using a Databricks notebook that is directly connected to their pipeline. After adding new table definitions and transformation logic in their notebook, they want to check for any syntax errors in the pipeline code without actually processing any data or running the pipeline. How should the data engineer perform this syntax check? 
+A Use the "Validate" option in the notebook to check for syntax errors.
+ BO Disconnect the notebook from the pipeline and reconnect it to a compute cluster to access code validation features. 
+ Switch to a workspace file instead of a notebook to access the validation and diagnostics tools.
+ DO Open the web terminal from the notebook and run a shell command to validate the pipeline code.
+-----------------------------------------------------------------------------------------------------------------------------
+23 of 59. A data engineer is designing a system to process batch patient encounter data stored in an S3 bucket, creating a Delta table (patient encounters) with columns encounter_id, patient_id, encounter_date, diagnosis_code, and treatment_cost. The table is queried frequently by patient_id and encounter_date, requiring fast performance. Fine-grained access controls must be enforced. The engineer wants to minimize maintenance and boost performance. How should the data engineer create the patient_encounters table? 
+A Create a managed table in Unity Catalog. Configure Unity Catalog permissions for access controls, schedule jobs to run OPTIMIZE and VACUUM command daily to achieve best performance. 
+B. Create an external table in Unity Catalog, specifying an S3 location for the data files. Enable predictive optimization through table properties, and configure Unity Catalog permissions for access controls. 
+CO Create a managed table in Hive metastore. Configure Hive metastore permissions for access controls, and rely on predictive optimization to enhance query performance and simplify maintenance. n. 
+Create a managed table in Unity Catalog. Configure Unity Catalog permissions for access controls, and rely on predictive optimization to enhance query performance and simplify maintenance.
+-----------------------------------------------------------------------------------------------------------------------------
+24 of 59. A data engineering team is setting up deployment automation. To deploy workspace assets remotely using the Databricks CLI command, they must configure it with proper authentication. Which authentication approach will provide the highest level of security? 
+A Use a shared user account and its OAuth client secret 
+Use a service principal and its Personal Access Token 
+Use a service principal ID and its OAuth client secret 
+D Use a service principal with OAuth token federation
+-----------------------------------------------------------------------------------------------------------------------------
+25 of 59. A query is taking too long to run. After investigating the Spark UI, the data engineer discovered a significant amount of disk spill. The type of compute instance the data engineer used only provides a core-to-memory ratio of 1:2. What are the two steps the data engineer should take to minimize spillage? 
+Choose 2 answers 
+A Reduce spark.sql.files.maxPartitionBytes. 
+Choose a compute instance with more network bandwidth. 
+Choose a compute instance with a higher core-to-memory ratio. 
+Choose a compute instance with more disk space. 
+Increase spark.sql.files.maxPartitionBytes.
+-----------------------------------------------------------------------------------------------------------------------------
+A data engineer is tasked with ensuring that a Delta table in Databricks continuously retains deleted files for 15 days (instead of the default 7 days), in order to permanently comply with the organization's data retention policy. Which code snippet correctly sets this retention period for deleted files? 
+spark.sql("ALTER TABLE my table SET TBLPROPERTIES ('delta.deletedFileRetentionDuration interval 15 days")") 
+BO from delta.tables import deltalable DeltaTable, forPath(spark, "/mnt/data/my_table") deltalable.deletedfilefletentionDuration "interval 15 days" 
+CO spark sol ("VACUUM my table RETAIN 15 HOURS") 
+DO spark.conf.set("spark.databricks.delta.deletedFileRetentionDuration", "15 days")
+-----------------------------------------------------------------------------------------------------------------------------
+27 of 59. A data team is implementing an append-only Delta Lake pipeline that needs to handle both batch and streaming data. They want to ensure that schema changes in the source data can be automatically incorporated without breaking the pipeline. Which configuration should the team use when writing data to the Delta table? 
+A ignoreChanges = false 
+validateSchema = false 
+CO overwrite Schema = true 
+D merge Schema = true
+-----------------------------------------------------------------------------------------------------------------------------
+28 of 59. A data engineer wants to enforce the principle of least privilege when configuring ACLs for Databricks jobs in a collaborative workspace. Which approach should the data engineer use? 
+
+AO Grant CAN RUN permission to everyone and CAN MANAGE to a single admin group.
+ Assign users only the minimum permission level (e.g., CAN RUN or CAN VIEW) required for their role on each job. 
+C. Grant all users CAN MANAGE permission on all jobs to avoid access issues. 
+D. Use only folder-level permissions and avoid setting permissions on individual jobs.
+-----------------------------------------------------------------------------------------------------------------------------
+29 of 59. How are the operational aspects of Lakeflow Spark Declarative Pipelines from Spark Structured Streaming different? 
+ Lakeflow Spark Declarative Pipelines can write to Delta Lake format, while structured streaming cannot. 
+ Lakefilow Spark Declarative Pipelines manage the orchestration of multi-stage pipelines automatically, while Structured Streaming requires external orchestration for complex dependencies.
+ Lakeflow Spark Declarative Pipelines automatically handle schema evolution, while Structured Streaming always requires manual schema management 
+ Structured Streaming can process continuous data streams, while Lakeflow Spark Declarative Pipelines cannot.
+-----------------------------------------------------------------------------------------------------------------------------
+30 of 59. A company has a task management system that tracks the most recent status of tasks. The system takes task events as input and processes events in near real-time using Lakeflow Spark Declarative Pipelines. A new task event is ingested into the system when a task is created or the task status is changed. Lakeflow Spark Declarative Pipelines provides a streaming table (table name: tasks_status) for the BI users to query The table represents the latest status of all tasks and includes 5 columns: task id(unique for each task), task_name, task_owner, bank status, task_event_time. The table enables 3 properties: deletion vectors, row tracking, and change data feed. 
+A data engineer is asked to create a new Lakeflow Spark Declarative Pipelines to enrich the "tasks_status" table in near real-time by adding one additional column representing task_owner's department, which can be looked up from a static dimension table (table name: employee). How should this enrichment be implemented? 
+
+A Create a new Lakeflow Spark Declarative Pipelines: use readStream() function with option readChangeFeed to read tasks_status table CDF, enrich with the employee table; create a new streaming table as the result table and use apply_changes () function to process the changes from the enriched CDF. 
+B. Create a new Lakeflow Spark Declarative Pipeline: use the readStream() function with the option skipChangeCommits to read the tasks status table; enrich with the employee table; store the result in a new streaming table. 
+CO Create a new Lakeflow Spark Declarative Pipeline: use the read() function to read tasks_status table; enrich with employee table; store the result in a materialized view. 
+D. Create a new Lakeflow Spark Declarative pipeline: use the readStream() function to read tasks_status table; enrich with the employee table, store the result in a new streaming table.
+-----------------------------------------------------------------------------------------------------------------------------
+31 of 59. A data engineer needs to implement column masking for a sensitive column in a Unity Catalog- managed table. The masking logic must dynamically check if users belong to specific groups defined in a separate table (group_access) that maps groups to allowed departments. Which approach should the engineer use to efficiently enforce this requirement? 
+A. Create a view without selecting the sensitive column. 
+8. Create a UDF that hardcodes allowed groups and apply it as a column mask. 
+C. Apply a column mask that references the group_access mapping table in its UDF. 
+D. Use a row filter to restrict access based on the user's group.
+-----------------------------------------------------------------------------------------------------------------------------
+32 of 59. A data engineer wants to automate job monitoring and recovery in Databricks using the Jobs API. They need to list all jobs, identify a failed job, and rerun it. Which sequence of API actions should the data engineer perform? 
+A Use the jobs list endpoint to list jobs, check job run statuses with jobs runs list, and rerun a failed job using jobs run-now. 
+B. Use the jobs get endpoint to retrieve job details, then use jobs update to rerun failed jobs. 
+C. Use the jobs list endpoint to list jobs, then use the jobs create endpoint to create a new job, and run the new job using jobs run-now. 
+D. Use the jobs cancel endpoint to remove failed jobs, then recreate them with jobs create endpoint and run the new ones
+-----------------------------------------------------------------------------------------------------------------------------
+33 of 59. To sdentify the top users consuming compute resources, a data engineering team needs to monitor usage within their Databricks workspace for better resource utilization and cost control. The team decided to use Databricks system tables, available under the System catalog in Unity Catalog, to gain detailed visibility into workspace activity. Which SQL query should the team run from the System catalog to achieve this? 
+A SELECT sku name, sage metadata.run name AS user_email, quantity) AS total dbus FROK system.hilling.usage GROUP BY user email, sku name ORDER BY total dhus DESC LIMIT 10 
+B SELECT Identity metadata run as AS user email, Image tity) 45 total hus SEARCH Entity setadata.run as As mer ewall, SUNCusage groentity) AS total des System Billing.usage GROUP BY user email ORDER BY Total dous DESC LIMIT 10 
+CO sql SELECT sku name, Identity_metadata.created_by AS user email, sum(usage_quantity usage_unit) AS total dbus FROM system.billing.usage GROUP BY user_email, sku_name ORDER BY total dbus DESC LIMIT 10 
+D.O Xsql SELECT sku_name, identity_metadata.created by AS user_email, count(usage_quantity) AS total_dbus FROM system.billing.usage GROUP BY user email, sku name ORDER BY total dbus DESC LIMIT 10
+-----------------------------------------------------------------------------------------------------------------------------
+34 of 59. A data engineer is masking the provided data column containing the email address. The goal is to have an output of the same length for all rows, while keeping different outputs for different values. Which SQL function should be used to achieve this?
+ A mask (email, '?') 
+ B. shal (email,0)
+ CO hash (email) 
+ D.O shal ('email')
+-----------------------------------------------------------------------------------------------------------------------------
+35 of 59. A data organization has adopted Delta Sharing to securely distribute curated datasets from a Unity Catalog-enabled workspace. The data engineering team is sharing large Delta tables with an internal partner via Databricks-to-Databricks and aggregated reports with an external client via Open Sharing. While testing new sharing workflows, the data engineering team encounters challenges related to access control, data update visibility, and shareable object types. What is a limitation of the Delta Sharing protocol or implementation when used with Databricks-to-Databricks or Open Sharing? 
+A With Open sharing, recipients cannot access Volumes, Models, or notebooks - only static Delta tables are supported. 
+8 Delta Sharing does not support Unity Catalog enabled tables; only legacy Hive Metastore tables are shareable. 
+C Delta Sharing (both Databricks-to-Databricks and Open sharing) allows recipients to modify the source data if they have SELECT privileges. 
+DO With Databricks-to-Databricks sharing, Unity Catalog recipients must re-ingest data manually using COPY INTO OF REST APIS.
+-----------------------------------------------------------------------------------------------------------------------------
+36 of 59. A data engineering team is in the process of migrating off its legacy Hadoop platform. As part of the process, they are evaluating the different storage formats to see which offers the best query performance. Their legacy platform utilizes ORC and RCFile formats. They converted subset of their data to Delta Lake and ran a side-by-side benchmark, and found that their queries performed significantly better. Upon Investigation, they discovered that the query plans were different, and the queries that read from the Delta Lake tables leveraged a Shuffle Hash Jon, whereas the legacy formats used Sort Merge Joins. The queries that read from the Delta Lake tables also read less data. Which reason could be attributed to the difference in query performance? 
+A Delta Lake enables data skipping and file pruning using a vectorized Parquet reader. 
+The queries against the ORC tables leveraged the dynamic data skipping optimization but not the dynamic file pruning optimization. 
+The queries against the Delta Lake tables were able to leverage the dynamic file pruning optimization. 
+Shuffle Hash Joins are always more efficient than Sort Merge Joins.
+-----------------------------------------------------------------------------------------------------------------------------
+37 of 59. A data engineer is using Lakeflow Spark Declarative Pipelines Expectations feature to track the data quality of their incoming sensor data. Penodically, sensors send bad readings that are out of range, and they are currently flagging those rows with a warning and writing them to the silver table along with the good data. They've been given a new requirement - the bad rows need to be quarantined in a separate quarantine table and no longer included in the silver table. This is the existing code for their silver table: Bit.table @fit.expect("valid_sensor_reading", "reading < 120") def silver sensor_readings(): return spark.readStream.table("bronze_sensor_readings") Which code will satisfy the requirements? 
+Adit.table Wait.expect("walid sensor reading", "reading < 120") def silver menor readings(): hphich coder will saltaly the requirements? Adit.table edit.msport ("valid sensor_reading", "reading < 120") def silver nonsor readings (): retuca spark.readStream.table("bronze_sensor_readings") edit.table @dlt.expect("invalid_sensor_reading", "reading >= 120") def quarantine sensor readings(): return spark.readStream.table ("bronze_sensor_readings") 
+BO @dlt.table edit.expect or drop("valid sensor_reading", "reading < 120") def silver sensor readings(): return spark.readStream.table("bronze_sensor_readings") @dlt.table edit.expect("invalid_sensor_reading", "reading < 120") def quarantine_sensor_readings(): return spark.readStream.table("bronze_sensor_readings") CO @dlt.table @dlt.expect_or_drop("valid_sensor_reading", "reading < 120") def silver sensor readings (): return spark.readStream.table ("bronze_sensor_readings") @dlt.table edit.expect_or_drop("invalid_sensor_reading", "reading 120") def quarantine sensor_readings(): return spark.readStream.table("bronze_sensor_readings") 
+D.O @dlt.table @dlt.expect_or_drop("valid_sensor_reading", "reading < 120") def silver_sensor_readings (): return spark.readStream.table("bronze_sensor_readings") @dit.table Bdit.expect("invalid_sensor_reading", "reading> 120") def quarantine sensor
+-----------------------------------------------------------------------------------------------------------------------------
+38 of 59. A data engineer is attempting to execute the following PySpark code: spark.read.table("sales") result = df.groupBy("region").agg(sum ("revenue")) However, upon inspecting the execution plan and profiling the Spark job, they observe excessive data shuffling during the aggregation phase, Which technique should be applied to reduce shuffling during the groupBy aggregation operation? 
+A Caching the DataFrame df 
+B. Use broadcast join 
+CO Use coalesce (1) after the aggregation 
+DO Repartition by region before aggregation
+
+-----------------------------------------------------------------------------------------------------------------------------
+39 of 59. A data engineer has configured their Databricks Asset Bundle with multiple targets in databricks.yml and deployed it to the production workspace. Now, to validate the deployment, they need to invoke a job named my_project_job specifically within the prod target context. Assuming the job is already deployed, they need to trigger its execution while ensuring the target-specific configuration is respected. Which command will trigger the job execution? A databricks run my_project_job-t prod B.O databricks execute my_project_job -e prod CO databricks job run my project_job --env prod D.O databricks bundle run my project_job-t prod Mark this item for later review. Comments:
+-----------------------------------------------------------------------------------------------------------------------------
+40 of 59. A data engineer manages a production Lakeflow Spark Declarative Pipeline that processes customer transaction data. The pipeline includes several data quality expectations, such as: transaction_amount > 0 and customer_id IS NOT NULL. These expectations are defined using the EXPECT clause in SQL. The engineer aims to monitor the pipeline's data quality by analyzing the number of records that passed or failed each expectation during the latest pipeline update. The Lakeflow Spark Declarative Pipelines event logs are stored in a Delta table named event_log_table. For the most recent pipeline update, determine a programmatically appropriate approach to extract information like the name of each expectation, associated dataset, count of records that passed the expectation, and count of records that failed the expectation. Which method retrieves the desired data quality metrics from the Lakeflow Spark Declarative Pipelines event log? ADIO
+ A Access the event_log_table, filter for events where event_type 'flow_progress', and parse the details.flow_progress.data_quality.expectations field to extract the required metrics. 
+8. Use the Lakeflow Spark Declarative Pipelines Ul to navigate to the specific pipeline, select the dataset, and view the Data Quality tab to manually retrieve the expectation metrics. 
+CO Query the event_log_table for events with event_type failed records fields. 'data_quality' and directly select the passed_records and 
+DO Access the event_log_table, filter for events where event_type = 'expectation_result', and extract the expectation metrics from the details field.
+-----------------------------------------------------------------------------------------------------------------------------
+41 of 59. A healthcare analytics team is implementing a dimensional model in Delta Lake for patient care analysis. They have a date dimension table and are evaluating design options to ensure it supports a wide range of time-based analyses. Which design approach for the date dimension will support efficient time-based querying and aggregation? 
+A Store the date as a string in ISO format (YYYY-MM-DD) for readability. 
+B. Store only the date value and calculate all time attributes in queries. 
+Pre-calculate attributes like fiscal_period, quarter, month_name, day_of_week, and holiday. 
+DO Create separate dimension tables for different calendar systems (fiscal, academic, etc.).
+-----------------------------------------------------------------------------------------------------------------------------
+42 of 59. A data engineering team uses Databricks Lakehouse Monitoring to track the percent_null metric for a critical column in their Delta lable. The profile metrics table (prod_catalog.prod_schema.customer_data_profile_metrics) stores hourly percent_null values. The team wants to trigger an alert when the daily average of percent_null exceeds 5% for three consecutive days, while ensuring notifications aren't spammed during sustained issues. Which SQL alert configuration achieves this goal while minimizing false positives and redundant notifications? 
+A SELECT percent_null FROM prod_catalog.prod_schema.customer_data_profile_metrics WHERE window.end >>> CURRENT TIMESTAMP INTERVAL '1' DAY Alert Condition: percent_null > 5 Notification Frequency: At most every 24 hours 
+BO SELECT AVG (percent_null) AS daily_avg FROM prod_catalog.prod_schema.customer_data_profile_metrics WHERE window.end >= CURRENT_TIMESTAMP INTERVAL '3' DAY Alert Condition: daily_avg > 5 Notification Frequency: Each time alert is evaluated 
+CO WITH daily avg AS (SELECT DATE TRUNC('DAY', window.end) AS day, AVG (percent_null) AS avg_null FROM prod catalog.prod_schema.customer_data_profile_metrics GROUP BY DATE TRUNC('DAY', window.end)) SELECT day, ava null FROM daily_avg ORDER BY day DESC LIMIT 3 Alert Condition: ALL avg_null > 5 for the latest cows Notification Frequency: Just once 
+DO SELECT SUMICASE WHEN percent_null > 5 THEN 1 ELSE 0 END) AS violation_days FROM prodcatalog.prod_schema.customer_data_profile_metrics WHERE window.end > CURRENT TIMESTAMP 13 DAY Alert Condition: violation_days >= 3 Notification Frequency: Just once INTERVAL
+-----------------------------------------------------------------------------------------------------------------------------
+43 of 59. A data engineering team is configuring access controls in Databricks Unity Catalog. They grant the SELECT privilege on the sales catalog to the analyst group, expecting that members of this group will automatically have SELECT access to all current and future schemas, tables, and views within the sales catalog. What describes the privilege inheritance behavior in Unity Catalog? 
+A Granting SELECT on a catalog automatically applies SELECT to all current and future schemas, tables, and views within that catalog. 
+B. Granting SELECT at the catalog level applies to existing schemas and tables but not to those created in the future. 
+CO Privileges in Unity Catalog do not cascade; SELECT must be explicitly granted on each schema and table, even if granted at the catalog level. 
+   Privileges granted at the schema level override any catalog-level privileges and prevent access unless explicitly revoked.
+-----------------------------------------------------------------------------------------------------------------------------
+44 of 59. A facilities monitoring team is building a near-real-time PowerBI dashboard off the Delta table device_readings: column device id event ta temperature type STRING CDOUBLE notes unique sensor ID TIMESTAMPingestion timestamp (UTC) temperature in °C For each sensor, the team needs one row per non-overlapping 5-minute interval, offset by 2 minutes, (e.g., intervals like 00:02-00:07, 00:07-00:12,...), showing the average temperature in that slice. The result must include each interval's start and end timestamps so downstream tools can plot time-series bars correctly. Which query satisfies the requirement? AO WITH buckets AS ( SELECT device_id, window (event ts, '5 minutes', '2 minutes', '5 minutes') AS win, temperature_c FROM device_readinga SELECT
+-----------------------------------------------------------------------------------------------------------------------------
+45 of 59. A senior data engineer is planning large-scale data workflows. The current task is to identify the considerations that form a foundation for creating scalable data models that are essential for effective management of large datasets. The data engineering team has identified the core capabilities as part of a scalable data model to build a modern data platform and provided their reasoning for considering Delta Lake for review. The senior data engineer is responsible for identifying the recommendations that are not valid. Which key features can be ignored while evaluating Delta Lake? 
+A Delta Lake provides limited support for monitoring and troubleshooting data pipelines, so relevant partner tools have to be identified and set up for enhanced operational efficiency. 
+8 Delta Lake's capability to process data in both batch and streaming modes seamlessly, providing flexibility in data ingestion and processing 
+  Delta Lake optimizes metadata handling, efficiently managing billions of files and facilitating scalability to petabyte-scale datasets. 
+O Delta Lake works with various data formats (e.g., Parquet, JSON, CSV) and integrates well with Spark and Databricks tools.
+-----------------------------------------------------------------------------------------------------------------------------
+46 of 59. A data engineer is configuring a Lakeflow Spark Declarative Pipelines to process CDC data from a source. The source events sometimes arrive out of order, and multiple updates may occur with the same update_timestamp but with different update_sequence_id. What should the data engineer do to ensure events are sequenced correctly? 
+A. Use dropduplicate () to remove out-of-order and duplicate records in LDP.
+ Use SEQUENCE BY STRUCT (event_timestamp, update_sequence_id) in AUTO CDC APIs. 
+CO Set track history_column_list to [event_timestamp, event_id] in AUTO CDC APIs.
+ D. Use a window function to sort update_sequence_id within the same partition, i.e., update_timestamp in the LDP pipeline.
+-----------------------------------------------------------------------------------------------------------------------------
+47 of 59. A data engineer is designing a data pipeline in Databricks that needs to process records from a Kafka stream where late-arriving data is common. Which approach should the data engineer use? 
+A Uise batch processing and overwrite the entire output table each time to ensure late data is incorporated correctly. 
+Use a watermark to specify the allowed lateness to accommodate records that arrive after their expected window, ensuring correct aggregation and state management. 
+CO Implement a custom solution using Databricks Jobs to periodically reprocess all historical data. 
+Use an Auto CDC pipeline with batch tables to simplify late data handling.
+-----------------------------------------------------------------------------------------------------------------------------
+48 of 59. A data engineer is using Auto Loader to read in JSON data as it arrives. They have configured Auto Loader to quarantine invalid JSON records. They are noticing that over time, some records are being quarantined even though they are well-formed JSON. The snippet of code is: df (spark.readStream format ("cloudFiles") option("cloudFiles.format", "json") Loption("badRecordsPath", "/tmp/somewhere/badRecordsPath") schema ("a int, b int") Load("/Volumes/catalog/schema/raw_data/")) What is the cause of the missing data? 7 
+A. The source data is valid JSON, but doesn't conform to their defined schema in some way 
+B. The bad RecordsPath location is accumulating many small files 
+CO At some point, the upstream data provider switched everything to multi-line JSON 
+DO The engineer forgot to set the option "cloudFiles.quarantineMode", "rescue"
+-----------------------------------------------------------------------------------------------------------------------------
+49 of 59. A data engineer wants to ingest a large collection of image files (JPEG and PNG) from cloud object storage into Unity Catalog-managed table for further analysis and visualization. Which two configurations and practices are recommended to incrementally ingest these images into the table? 
+Choose 2 answers 
+A. Use Auto loader and set cloudFiles.format to "IMAGE" 
+B. Use Auto loader and set cloudFiles.format to "BINARYFILE" 
+C. Use the path GlobFilter option to select only image files (e.g., "*.jpg, *.png") 
+D. Move files to a volume and read with SQL editor 
+E Use Auto loader and set cloudFiles.format to "TEXT"
+-----------------------------------------------------------------------------------------------------------------------------
+50 of 59. A data engineer is designing an append-only pipeline that needs to handle both batch and streaming data in Delta Lake. The team wants to ensure that the streaming component can efficiently track which data has already been processed. Which configuration should be set to enable this? 
+A. overwrite Schema 
+B. checkpointLocation 
+C. mergeSchema 
+D. partitionBy
+-----------------------------------------------------------------------------------------------------------------------------
+51 of 59. A data governance team at a large enterprise is improving data discoverability across its organization. The team has hundreds of tables in their Databricks Lakehouse with thousands of columns that lack proper documentation. Many of these tables were created by different teams over several years, with missing context about column meanings and business logic. The data governance team needs to quickly generate comprehensive column descriptions for all existing tables to meet compliance requirements and improve data literacy across the organization. They want to leverage modern capabilities to automatically generate meaningful descriptions rather than manually documenting each column, which would take months to complete. The team is looking for a solution that can understand data patterns, column names, and sample values to create intelligent descriptions. Which approach should the team use in Databricks to automatically generate column comments and descriptions for existing tables? 
+A. Write custom PySpark code using df. describe() and df.schema to programmatically generate basic statistical descriptions for each column. 
+B. Use Delta Lake's DESCRIBE HISTORY command to analyze table evolution and infer column purposes from historical changes. 
+C. Use the DESCRIBE TABLE Command to extract existing schema information and manually write descriptions based on column names and data types. 
+D. Navigate to the table in Databricks Catalog Explorer, select the table schema view, and use the "Al Generate" option which leverages artificial intelligence to automatically create meaningful column descriptions based on column names, data types, sample values, and data patterns
+-----------------------------------------------------------------------------------------------------------------------------
+52 of 59. A data team is automating a daily multi-task ETL pipeline in Databricks. The pipeline includes a notebook for ingesting raw data, a Python wheel task for data transformation, and a SQL query to update aggregates. They want to trigger the pipeline programmatically and see previous runs in the GUI. They need to ensure tasks are retried on failure and stakeholders are notified by email if any task fails. Which two approaches will meet these requirements? Choose 2 answers
+ A Use the REST API endpoint/jobs/runs/submit to trigger each task individually as separate job runs and implement retries using custom logic in the orchestrator. Create a single notebook that uses dbutils.notebook.run() to call each step in sequence. Define a job on this orchestrator notebook and configure retries and notifications at the notebook level.
+ C. Create a multi-task job using the UI, DABs, or the Jobs REST API (/jobs/create) with notebook, Python wheel, and SQL tasks. Configure task-level retries and email notifications in the job definition.
+D. Trigger the job programmatically using the Databricks Jobs REST API (/jobs/run-now), the CLI (databricks jobs run-now), or one of the Databricks SDKs.
+-----------------------------------------------------------------------------------------------------------------------------
+53 of 59. A data engineer, while designing a Pandas UDF to process financial time series data with complex calculations that require maintaining state across rows within each stock symbol group must ensure the function is efficient and scalable. Which approach will solve the problem with minimum overhead while preserving data integrity? 
+A Use a SCALAR ITER Pandas UDF with iterator-based processing, implementing state management through persistent storage (Delta tables) that gets updated after each batch to maintain continuity across iterator chunks. 
+BO Use applyInPandas method on spark dataframe that receives all rows for each stock symbol as a pandas DataFrame, allowing processing within each group while maintaining state variables local to each group's processing function. 
+CO Use a SCALAR Pandas UDF that processes the entire dataset at once, implementing custom partitioning logic within the UDF to group by stock symbol and maintain state using global variables shared across all executor processes. D. Use a GROUPED_AGG Pandas UDF that processes each stock symbol group independently, maintaining state through intermediate aggregation results that get passed between successive UDF calls via broadcast variables.
+-----------------------------------------------------------------------------------------------------------------------------
+54 of 59. While reviewing a query's execution in the Databricks Query Profile, a data engineer observes that the "Top operators" panel shows a sort operator with high "Time spent" and "Memory peak" metrics, and the Spark UI reports frequent data spilling. How should the data engineer address this issue? 
+A Increase the number of shuffle partitions to better distribute data. 
+B. Switch to a broadcast join to reduce memory usage. 
+CO Convert the sort operation to a filter operation. 
+DO Repartition the DataFrame to a single partition before sorting.
+-----------------------------------------------------------------------------------------------------------------------------
+55 of 59. A data engineer is building a Lakeflow Spark Declarative Pipelines pipeline to process healthcare claims data. A metadata JSON file defines data quality rules for multiple tables, including: "claims": [ ["name": "valid_patient_id", "constraint": "patient id IS NOT NULL"}, {"name": "non negative_amount", "constraint": "claim_amount > 
+0) The pipeline must dynamically apply these rules to the claims table without hardcoding the rules. How should the data engineer achieve this? 
+A Use a SQL CONSTRAINT block referencing the JSON file path. 
+B. Load the JSON metadata, loop through its entries, and apply expectations using dlt.expect_all. 
+CO Invoke an external API to validate records against the metadata rules. 
+DO Reference each expectation with @dlt.expect decorators in the table declaration.
+-----------------------------------------------------------------------------------------------------------------------------
+
+
+
+56 of 59. Which approach demonstrates a modular and testable way to use DataFrame.transform for ETL code in PySpark? 
+A class Pipeline: def transform(self, df): return df.withColumn("value_upper", upper (col ("value"))) pipeline Pipeline() assertDataFrameEqual (pipeline.transform(test_input), expected) 
+B. def upper_value(df): return df.withColumn ("value_upper", upper (col ("value"))) def filter positive (df): return df.filter (df ["id"] > 0) pipeline_df df.transform(upper_value).transform(filter_positive) 
+C. def transform_data(input_df): transformation logic here return output_df test input spark.createDataFrame ([(1, "a")], ["id", "value"]) assert DataFrameEqual (transform_data(test_input), expected) 
+D. def upper_transform(df): return df.withColumn ("value_upper", upper (col ("value"))) actual test_input.transform(upper_transform) assertDataFrameEqual (actual, expected)
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+58 of 59.
+
+A data engineer is configuring a Databricks Asset Bundle to deploy a job with granular permissions. The requirements are:
+
+Grant the data-engineers group CAN MANAGE access to the job.
+
+Ensure the auditors' group can view the job but not modify/run it.
+
+Avoid granting unintended permissions to other users/groups.
+
+How should the data engineer deploy the job while meeting the requirements?
+
+
+
+Aresources:
+
+Jobs:
+
+my-job:
+
+name: data-pipeline
+
+tasks:
+
+[...]
+
+job:
+
+[...]
+
+permissions:
+
+group name: data-engineers
+
+level: CAN MANAGE
+
+permissions:
+
+group name:
+
+auditors
+
+Envel: CAN VIEW
+
+B. permissions:
+
+group name: data engineers
+
+Sevel CAN MANAGE
+
+group пави auditors
+
+Serel CAN VIEW
+Tee CAN VIEM
+
+Pesources
+
+Jube:
+
+my Job
+
+name: data-pipeline
+
+tasks: [...]
+
+job clusters: [...]
+
+CO resources:
+
+Jobs:
+
+my-job:
+
+name: data-pipeline
+
+tasks: [...]
+
+job_clusters: [...]
+
+permissions:
+
+group name: data-engineers
+
+level: CAN MANAGE
+
+group_name: auditors
+
+level:
+
+CAN VIEW
+
+group name: admin-team
+
+level: IS OWNER
+
+D. 
+
+resources:
+
+jobs:
+
+my-Job:
+
+name: data-pipeline
+
+tasks: [...]
+
+job clusters: [...]
+
+permissions:
+
+group name: data-engineers
+
+level: CAN MANAGE
+
+group name: auditors
+
+C
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+59 of 59. A data engineer is using Lakeflow Declarative Pipeline to propagate row deletions from a source bronze table (user_bronze) to a target silver table (user_silver). The developer wants deletions in user_bronze to automatically delete corresponding rows in user silver during pipeline execution. Which configuration ensures deletions in the bronze table are propagated to the silver table? 
+A Configure VACUUM on user_bronze to delete files, then rebuild user_silver from scratch. 
+8. Enable CDF on user_silver, read its transaction log, and use MERGE to sync deletions. 
+CO Enable CDF on user_bronze, read its CDF stream, and use apply_changes with apply_as_deletes for user_silver. 
+0. Use apply changes without CDF and filter rows where_soft_deleted is true.
+
+ Mark this item for later review.
